@@ -74,7 +74,7 @@ func bump(field string, file string) (string, error) {
 	versionNumber := getVersion(version)
 	versionNumber = versionNumber.increment(field)
 	metadata[line] = fmt.Sprintf("version '%v.%v.%v'", versionNumber.Major, versionNumber.Minor, versionNumber.Patch)
-	return strings.Join(metadata, "\n"), nil
+	return strings.Join(metadata[:len(metadata)-1], "\n"), nil
 }
 
 func main() {
@@ -114,7 +114,7 @@ func main() {
 			},
 		},
 		{
-			Name:      "Major",
+			Name:      "major",
 			ShortName: "M",
 			Usage:     "increment the major version",
 			Action: func(c *cli.Context) error {
