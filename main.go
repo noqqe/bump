@@ -98,7 +98,7 @@ func main() {
 			ShortName: "p",
 			Usage:     "increment the patch version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Patch", c.Args().Get(2))
+				data, err := bump("Patch", c.Args().Get(0))
 				check(err)
 				fmt.Println(data)
 				return nil
@@ -109,7 +109,7 @@ func main() {
 			ShortName: "m",
 			Usage:     "increment the minor version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Minor", c.Args().Get(2))
+				data, err := bump("Minor", c.Args().Get(0))
 				check(err)
 				fmt.Println(data)
 				return nil
@@ -120,7 +120,7 @@ func main() {
 			ShortName: "M",
 			Usage:     "increment the major version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Major", c.Args().Get(2))
+				data, err := bump("Major", c.Args().Get(0))
 				check(err)
 				fmt.Println(data)
 				return nil
