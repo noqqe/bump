@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -11,6 +11,8 @@ import (
 
 	"github.com/urfave/cli"
 )
+
+var Version = "unknown"
 
 type version struct {
 	Major int
@@ -35,7 +37,7 @@ func (v version) increment(incrementField string) version {
 
 func check(e error) {
 	if e != nil {
-		fmt.Println(e)
+		log.Println(e)
 		os.Exit(1)
 	}
 }
@@ -50,7 +52,7 @@ func getVersionLine(s []string) (int, string) {
 }
 
 func getVersion(s string) version {
-	versionString := strings.Split(s, "'")[1]
+	versionString := s
 	versionArray := make([]int, 3)
 	for i, v := range strings.Split(versionString, ".") {
 		int, err := strconv.Atoi(v)
@@ -65,31 +67,27 @@ func getVersion(s string) version {
 	return version
 }
 
-func bump(field string, file string) (string, error) {
+func bump(field string, version string) (string, error) {
 	// Actual work
-	dat, err := ioutil.ReadFile(file)
-	check(err)
-	metadata := strings.Split(string(dat), "\n")
-	line, version := getVersionLine(metadata)
 	versionNumber := getVersion(version)
 	versionNumber = versionNumber.increment(field)
-	metadata[line] = fmt.Sprintf("version '%v.%v.%v'", versionNumber.Major, versionNumber.Minor, versionNumber.Patch)
-	return strings.Join(metadata[:len(metadata)-1], "\n"), nil
+	return fmt.Sprintf("%v.%v.%v", versionNumber.Major, versionNumber.Minor, versionNumber.Patch), nil
 }
 
 func main() {
 	// CLI Definition
 	app := cli.NewApp()
-	app.Name = "Incrementer"
-	app.Version = "0.1.0"
+	app.Name = "bump"
+	app.Version = Version
+	app.HelpName = "bump"
+	app.Description = "dumb version bump"
 	app.Compiled = time.Now()
 	app.Authors = []cli.Author{
 		cli.Author{
-			Name:  "Jason Morgan",
-			Email: "Jason.Morgan@digitalglobe.com",
+			Name: "noqqe",
 		},
 	}
-	app.UsageText = "incrementer COMMAND PATH_TO_METADATA_FILE"
+	app.UsageText = "bump <command> version"
 	app.Commands = []cli.Command{
 		{
 			Name:      "patch",

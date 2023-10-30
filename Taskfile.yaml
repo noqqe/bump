@@ -1,0 +1,25 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -ldflags "-X github.com/noqqe/bump/main.Version=`git describe --tags`"  -v -o bump main.go
+    sources:
+      - "main.go"
+    generates:
+      - "./bump"
+
+  release:
+    interactive: true
+    cmds:
+      - git tag | sort -t. -k 1,1n -k 2,2n -k 3,3n | tail -5
+      - read -p "Version 1.1.1 " version ; git tag $version
+      - git push --tags
+      - goreleaser release --clean
+
+  default:
+    cmds:
+      - task: build
+
