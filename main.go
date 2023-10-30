@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -69,6 +70,9 @@ func getVersion(s string) version {
 
 func bump(field string, version string) (string, error) {
 	// Actual work
+	if version == "" {
+		return "", errors.New("No version string given. Check usage.")
+	}
 	versionNumber := getVersion(version)
 	versionNumber = versionNumber.increment(field)
 	return fmt.Sprintf("%v.%v.%v", versionNumber.Major, versionNumber.Minor, versionNumber.Patch), nil
@@ -80,7 +84,7 @@ func main() {
 	app.Name = "bump"
 	app.Version = Version
 	app.HelpName = "bump"
-	app.Description = "dumb version bump"
+	app.Usage = "dumb version bump"
 	app.Compiled = time.Now()
 	app.Authors = []cli.Author{
 		cli.Author{
@@ -94,7 +98,7 @@ func main() {
 			ShortName: "p",
 			Usage:     "increment the patch version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Patch", os.Args[2])
+				data, err := bump("Patch", c.Args().Get(2))
 				check(err)
 				fmt.Println(data)
 				return nil
@@ -105,7 +109,7 @@ func main() {
 			ShortName: "m",
 			Usage:     "increment the minor version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Minor", os.Args[2])
+				data, err := bump("Minor", c.Args().Get(2))
 				check(err)
 				fmt.Println(data)
 				return nil
@@ -116,7 +120,7 @@ func main() {
 			ShortName: "M",
 			Usage:     "increment the major version",
 			Action: func(c *cli.Context) error {
-				data, err := bump("Major", os.Args[2])
+				data, err := bump("Major", c.Args().Get(2))
 				check(err)
 				fmt.Println(data)
 				return nil
