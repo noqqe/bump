@@ -25,10 +25,10 @@ func (v version) increment(incrementField string) version {
 	switch incrementField {
 	case "Major":
 		n := v.Major + 1
-		return version{n, v.Minor, v.Patch}
+		return version{n, 0, 0}
 	case "Minor":
 		n := v.Minor + 1
-		return version{v.Major, n, v.Patch}
+		return version{v.Major, n, 0}
 	case "Patch":
 		n := v.Patch + 1
 		return version{v.Major, v.Minor, n}
