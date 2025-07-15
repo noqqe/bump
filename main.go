@@ -1,15 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 var Version = "unknown"
@@ -35,14 +34,7 @@ func (v version) increment(incrementField string) version {
 	return v
 }
 
-func check(e error) {
-	if e != nil {
-		log.Println(e)
-		os.Exit(1)
-	}
-}
-
-func getVersion(s string) version {
+func getVersion(s string) (version, error) {
 	versionString := s
 	versionArray := make([]int, 3)
 	for i, v := range strings.Split(versionString, ".") {
@@ -51,8 +43,7 @@ func getVersion(s string) version {
 		// Check if we have a valid version string
 		// if it could not beconverted its probably a string
 		if err != nil {
-			fmt.Println(s)
-			os.Exit(0)
+			return version{}, errors.New("invalid version string: " + s)
 		}
 		versionArray[i] = int
 	}
@@ -61,65 +52,64 @@ func getVersion(s string) version {
 		versionArray[1],
 		versionArray[2],
 	}
-	return version
+	return version, nil
 }
 
 func bump(field string, version string) (string, error) {
-	// Actual work
-	if version == "" {
-		return "", errors.New("no version string given. Check usage")
+	versionNumber, err := getVersion(version)
+	if err != nil {
+		return version, nil
 	}
-	versionNumber := getVersion(version)
 	versionNumber = versionNumber.increment(field)
 	return fmt.Sprintf("%v.%v.%v", versionNumber.Major, versionNumber.Minor, versionNumber.Patch), nil
 }
 
 func main() {
 	// CLI Definition
-	app := cli.NewApp()
-	app.Name = "bump"
-	app.Version = Version
-	app.HelpName = "bump"
-	app.Usage = "dumb version bump"
-	app.Compiled = time.Now()
-	app.Authors = []cli.Author{{
-		Name: "noqqe",
-	}}
-	app.UsageText = "bump <command> version"
-	app.Commands = []cli.Command{
-		{
-			Name:      "patch",
-			ShortName: "p",
-			Usage:     "increment the patch version",
-			Action: func(c *cli.Context) error {
-				data, err := bump("Patch", c.Args().Get(0))
-				check(err)
-				fmt.Println(data)
-				return nil
+	cmd := &cli.Command{
+		Name:                  "bump",
+		EnableShellCompletion: true,
+		Commands: []*cli.Command{
+			{
+				Name:    "patch",
+				Aliases: []string{"p"},
+				Usage:   "increment the patch version",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					data, err := bump("Patch", cmd.Args().Get(0))
+					if err != nil {
+						return cli.Exit("Could not bump version", 1)
+					}
+					fmt.Println(data)
+					return nil
+				},
 			},
-		},
-		{
-			Name:      "minor",
-			ShortName: "m",
-			Usage:     "increment the minor version",
-			Action: func(c *cli.Context) error {
-				data, err := bump("Minor", c.Args().Get(0))
-				check(err)
-				fmt.Println(data)
-				return nil
+			{
+				Name:    "minor",
+				Aliases: []string{"m"},
+				Usage:   "increment the minor version",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					data, err := bump("Minor", cmd.Args().Get(0))
+					if err != nil {
+						return cli.Exit("Could not bump version", 1)
+					}
+					fmt.Println(data)
+					return nil
+				},
 			},
-		},
-		{
-			Name:      "major",
-			ShortName: "M",
-			Usage:     "increment the major version",
-			Action: func(c *cli.Context) error {
-				data, err := bump("Major", c.Args().Get(0))
-				check(err)
-				fmt.Println(data)
-				return nil
+			{
+				Name:    "major",
+				Aliases: []string{"M"},
+				Usage:   "increment the major version",
+				Action: func(c context.Context, cmd *cli.Command) error {
+					data, err := bump("Major", cmd.Args().Get(0))
+					if err != nil {
+						return cli.Exit("Could not bump version", 1)
+					}
+					fmt.Println(data)
+					return nil
+				},
 			},
 		},
 	}
-	app.Run(os.Args)
+	cmd.Run(context.Background(), os.Args)
 }
