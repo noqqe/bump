@@ -67,7 +67,7 @@ func getVersion(s string) version {
 func bump(field string, version string) (string, error) {
 	// Actual work
 	if version == "" {
-		return "", errors.New("No version string given. Check usage.")
+		return "", errors.New("no version string given. Check usage")
 	}
 	versionNumber := getVersion(version)
 	versionNumber = versionNumber.increment(field)
@@ -82,11 +82,9 @@ func main() {
 	app.HelpName = "bump"
 	app.Usage = "dumb version bump"
 	app.Compiled = time.Now()
-	app.Authors = []cli.Author{
-		cli.Author{
-			Name: "noqqe",
-		},
-	}
+	app.Authors = []cli.Author{{
+		Name: "noqqe",
+	}}
 	app.UsageText = "bump <command> version"
 	app.Commands = []cli.Command{
 		{
