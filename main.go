@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -43,21 +42,18 @@ func check(e error) {
 	}
 }
 
-func getVersionLine(s []string) (int, string) {
-	for i, v := range s {
-		if match, _ := regexp.MatchString("version.*", v); match {
-			return i, v
-		}
-	}
-	return 0, "no dice"
-}
-
 func getVersion(s string) version {
 	versionString := s
 	versionArray := make([]int, 3)
 	for i, v := range strings.Split(versionString, ".") {
 		int, err := strconv.Atoi(v)
-		check(err)
+
+		// Check if we have a valid version string
+		// if it could not beconverted its probably a string
+		if err != nil {
+			fmt.Println(s)
+			os.Exit(0)
+		}
 		versionArray[i] = int
 	}
 	version := version{
