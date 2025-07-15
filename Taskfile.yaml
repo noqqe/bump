@@ -5,6 +5,7 @@ version: '3'
 tasks:
   build:
     cmds:
+      - go test
       - go build -ldflags "-X main.Version=`git describe --tags`" -v -o bump main.go
     sources:
       - "main.go"
